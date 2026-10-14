@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Probability Distributions - AIML Lab</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg font-bold text-lg">AIML</div>
+                <h1 class="text-xl font-bold text-slate-900 tracking-tight">Discrete Probability Distributions</h1>
+            </div>
+            <nav class="flex space-x-1 sm:space-x-4">
+                <button onclick="switchTab('home')" id="nav-home" class="nav-btn px-3 py-2 rounded-md text-sm font-medium transition-colors bg-indigo-50 text-indigo-700">Home</button>
+                <button onclick="switchTab('binomial')" id="nav-binomial" class="nav-btn px-3 py-2 rounded-md text-sm font-medium transition-colors text-slate-600 hover:text-indigo-600 hover:bg-slate-100">Binomial</button>
+                <button onclick="switchTab('poisson')" id="nav-poisson" class="nav-btn px-3 py-2 rounded-md text-sm font-medium transition-colors text-slate-400 cursor-not-allowed">Poisson <span class="text-xs bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded ml-1">Soon</span></button>
+                <button onclick="switchTab('geometric')" id="nav-geometric" class="nav-btn px-3 py-2 rounded-md text-sm font-medium transition-colors text-slate-400 cursor-not-allowed">Geometric <span class="text-xs bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded ml-1">Soon</span></button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- HOME TAB -->
+        <section id="tab-home" class="tab-content space-y-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <span class="text-indigo-600 font-semibold text-sm tracking-wide uppercase">Undergraduate AIML Laboratory</span>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4">Welcome to Probability Foundations</h2>
+                <p class="text-slate-600 text-lg leading-relaxed max-w-3xl">
+                    This interactive laboratory application is designed for Artificial Intelligence and Machine Learning students to explore foundational discrete probability distributions.
+                </p>
+                <div class="mt-6 flex gap-4">
+                    <button onclick="switchTab('binomial')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm">
+                        Explore Binomial Distribution &rarr;
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- BINOMIAL DISTRIBUTION TAB -->
+        <section id="tab-binomial" class="tab-content hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Binomial Distribution Explorer</h2>
+                <p class="text-slate-600 text-sm">
+                    Formula: $P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$ where $n$ is trials, $p$ is probability of success, and $k$ is successes.
+                </p>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="binomial-error" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-xl text-sm font-medium shadow-sm"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Controls Panel -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5 lg:col-span-1">
+                    <h3 class="font-semibold text-slate-900 border-b pb-2">Parameters</h3>
+                    
+                    <!-- Trials Input -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
+                            <span>Number of Trials ($n$):</span>
+                            <span id="n-val" class="font-bold text-indigo-600">20</span>
+                        </label>
+                        <input type="number" id="input-n" min="1" value="20" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="updateBinomial()">
+                        <span class="text-xs text-slate-500 mt-1 block">Must be a positive integer.</span>
+                    </div>
+
+                    <!-- Success Probability Input -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
+                            <span>Success Probability ($p$):</span>
+                            <span id="p-val" class="font-bold text-indigo-600">0.35</span>
+                        </label>
+                        <input type="number" id="input-p" min="0" max="1" step="0.01" value="0.35" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="updateBinomial()">
+                        <span class="text-xs text-slate-500 mt-1 block">Must be between 0 and 1.</span>
+                    </div>
+
+                    <div class="border-t pt-4 space-y-3">
+                        <h4 class="font-semibold text-slate-900 text-sm">Summary Statistics</h4>
+                        <div class="flex justify-between text-sm bg-slate-50 p-2.5 rounded-lg">
+                            <span class="text-slate-600">Mean ($\mu = np$):</span>
+                            <span id="stat-mean" class="font-semibold text-slate-900">7.00</span>
+                        </div>
+                        <div class="flex justify-between text-sm bg-slate-50 p-2.5 rounded-lg">
+                            <span class="text-slate-600">Variance ($\sigma^2 = npq$):</span>
+                            <span id="stat-variance" class="font-semibold text-slate-900">4.55</span>
+                        </div>
+                        <div class="flex justify-between text-sm bg-slate-50 p-2.5 rounded-lg">
+                            <span class="text-slate-600">Std Dev ($\sigma$):</span>
+                            <span id="stat-stddev" class="font-semibold text-slate-900">2.13</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualization Panel -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm lg:col-span-2 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-slate-900">Probability Mass Function (PMF)</h3>
+                        <span class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">Theoretical PMF</span>
+                    </div>
+                    <div class="relative h-80 w-full flex items-center justify-center">
+                        <canvas id="binomialChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-4">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            Undergraduate AIML Laboratory &bull; Discrete Probability Distributions Module
+        </div>
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        function switchTab(tabId) {
+            if (tabId === 'poisson' || tabId === 'geometric') return;
+            
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-indigo-50', 'text-indigo-700');
+                el.classList.add('text-slate-600');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.classList.remove('text-slate-600', 'hover:text-indigo-600', 'hover:bg-slate-100');
+            activeBtn.classList.add('bg-indigo-50', 'text-indigo-700');
+
+            if (tabId === 'binomial' && !window.binomialChartInstance) {
+                initBinomialChart();
+            }
+        }
+
+        function combinations(n, k) {
+            if (k < 0 || k > n) return 0;
+            if (k === 0 || k === n) return 1;
+            if (k > n / 2) k = n - k;
+            let c = 1;
+            for (let i = 1; i <= k; i++) {
+                c = c * (n - (k - i)) / i;
+            }
+            return c;
+        }
+
+        function binomialPMF(n, p, k) {
+            return combinations(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+        }
+
+        let binomialChartInstance = null;
+
+        function initBinomialChart() {
+            const ctx = document.getElementById('binomialChart').getContext('2d');
+            binomialChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'P(X = k)',
+                        data: [],
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        borderColor: 'rgb(99, 102, 241)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { title: { display: true, text: 'Number of Successes (k)' } },
+                        y: { title: { display: true, text: 'Probability P(X = k)' }, beginAtZero: true }
+                    }
+                }
+            });
+            updateBinomial();
+        }
+
+        function updateBinomial() {
+            const nInput = document.getElementById('input-n').value;
+            const pInput = document.getElementById('input-p').value;
+            const errorDiv = document.getElementById('binomial-error');
+
+            const n = parseInt(nInput, 10);
+            const p = parseFloat(pInput);
+
+            // Validation checks
+            let errors = [];
+            if (isNaN(n) || n <= 0 || !Number.isInteger(Number(nInput))) {
+                errors.push("Number of trials (n) must be a positive integer.");
+            }
+            if (isNaN(p) || p < 0 || p > 1) {
+                errors.push("Success probability (p) must be a value between 0 and 1.");
+            }
+
+            if (errors.length > 0) {
+                errorDiv.innerHTML = errors.join("<br>");
+                errorDiv.classList.remove('hidden');
+                return;
+            } else {
+                errorDiv.classList.add('hidden');
+            }
+
+            // Update displayed values clearly
+            document.getElementById('n-val').innerText = n;
+            document.getElementById('p-val').innerText = p.toFixed(2);
+
+            // Compute summary statistics
+            const mean = n * p;
+            const variance = n * p * (1 - p);
+            const stdDev = Math.sqrt(variance);
+
+            document.getElementById('stat-mean').innerText = mean.toFixed(2);
+            document.getElementById('stat-variance').innerText = variance.toFixed(2);
+            document.getElementById('stat-stddev').innerText = stdDev.toFixed(2);
+
+            // Compute PMF data points
+            const labels = [];
+            const data = [];
+            for (let k = 0; k <= n; k++) {
+                labels.push(k);
+                data.push(binomialPMF(n, p, k));
+            }
+
+            if (binomialChartInstance) {
+                binomialChartInstance.data.labels = labels;
+                binomialChartInstance.data.datasets[0].data = data;
+                binomialChartInstance.update();
+            }
+        }
+    </script>
+</body>
+</html>

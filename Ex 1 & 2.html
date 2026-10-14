@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Probability Distributions - AIML Lab</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg font-bold text-lg">AIML</div>
+                <h1 class="text-xl font-bold text-slate-900 tracking-tight">Discrete Probability Distributions</h1>
+            </div>
+            <nav class="flex space-x-1 sm:space-x-4">
+                <button onclick="switchTab('home')" id="nav-home" class="nav-btn px-3 py-2 rounded-md text-sm font-medium transition-colors bg-indigo-50 text-indigo-700">Home</button>
+                <button onclick="switchTab('binomial')" id="nav-binomial" class="nav-btn px-3 py-2 rounded-md text-sm font-medium transition-colors text-slate-600 hover:text-indigo-600 hover:bg-slate-100">Binomial</button>
+                <button onclick="switchTab('poisson')" id="nav-poisson" class="nav-btn px-3 py-2 rounded-md text-sm font-medium transition-colors text-slate-600 hover:text-indigo-600 hover:bg-slate-100">Poisson</button>
+                <button onclick="switchTab('geometric')" id="nav-geometric" class="nav-btn px-3 py-2 rounded-md text-sm font-medium transition-colors text-slate-400 cursor-not-allowed">Geometric <span class="text-xs bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded ml-1">Soon</span></button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- HOME TAB -->
+        <section id="tab-home" class="tab-content space-y-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <span class="text-indigo-600 font-semibold text-sm tracking-wide uppercase">Undergraduate AIML Laboratory</span>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4">Welcome to Probability Foundations</h2>
+                <p class="text-slate-600 text-lg leading-relaxed max-w-3xl">
+                    Explore interactive discrete probability distributions designed for Artificial Intelligence and Machine Learning students.
+                </p>
+                <div class="mt-6 flex gap-4">
+                    <button onclick="switchTab('binomial')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm">
+                        Explore Binomial &rarr;
+                    </button>
+                    <button onclick="switchTab('poisson')" class="bg-slate-800 hover:bg-slate-900 text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm">
+                        Explore Poisson &rarr;
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- BINOMIAL DISTRIBUTION TAB -->
+        <section id="tab-binomial" class="tab-content hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Binomial Distribution Explorer</h2>
+                <p class="text-slate-600 text-sm">
+                    Formula: $P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$ where $n$ is trials, $p$ is probability of success, and $k$ is successes.
+                </p>
+            </div>
+
+            <div id="binomial-error" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-xl text-sm font-medium shadow-sm"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Controls Panel -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5 lg:col-span-1">
+                    <h3 class="font-semibold text-slate-900 border-b pb-2">Parameters</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
+                            <span>Number of Trials ($n$):</span>
+                            <span id="n-val" class="font-bold text-indigo-600">15</span>
+                        </label>
+                        <input type="number" id="input-n" min="1" value="15" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="updateBinomial()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
+                            <span>Success Probability ($p$):</span>
+                            <span id="p-val" class="font-bold text-indigo-600">0.60</span>
+                        </label>
+                        <input type="number" id="input-p" min="0" max="1" step="0.01" value="0.6" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="updateBinomial()">
+                    </div>
+                </div>
+
+                <!-- Visualization & Statistics Panel -->
+                <div class="space-y-6 lg:col-span-2">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Mean ($\mu$)</span>
+                            <span id="stat-mean" class="text-xl font-bold text-indigo-600 mt-1 block">9.00</span>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Variance ($\sigma^2$)</span>
+                            <span id="stat-variance" class="text-xl font-bold text-indigo-600 mt-1 block">3.60</span>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Std Deviation ($\sigma$)</span>
+                            <span id="stat-stddev" class="text-xl font-bold text-indigo-600 mt-1 block">1.90</span>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Second Moment ($E[X^2]$)</span>
+                            <span id="stat-secondmoment" class="text-xl font-bold text-indigo-600 mt-1 block">84.60</span>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm col-span-2 sm:col-span-2">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Skewness</span>
+                            <span id="stat-skewness" class="text-xl font-bold text-indigo-600 mt-1 block">-0.11</span>
+                        </div>
+                    </div>
+
+                    <!-- PMF & CDF Calculators -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                        <h3 class="font-semibold text-slate-900 border-b pb-2">Probability Calculators</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Target ($k$):</label>
+                                <input type="number" id="input-k" min="0" value="9" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="updateBinomial()">
+                                <span id="k-hint" class="text-xs text-slate-500 mt-1 block">0 to 15</span>
+                            </div>
+                            <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-xl">
+                                <span class="text-xs font-semibold text-indigo-700 block">P(X = k)</span>
+                                <span id="pmf-result" class="text-xl font-bold text-indigo-900 mt-0.5 block">0.2066</span>
+                            </div>
+                            <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-xl">
+                                <span class="text-xs font-semibold text-emerald-700 block">P(X <= k)</span>
+                                <span id="cdf-le-result" class="text-xl font-bold text-emerald-900 mt-0.5 block">0.5968</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Panel -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-slate-900">Binomial PMF (Red dashed line = Mean)</h3>
+                        </div>
+                        <div class="relative h-72 w-full">
+                            <canvas id="binomialChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- POISSON DISTRIBUTION TAB -->
+        <section id="tab-poisson" class="tab-content hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Poisson Distribution Explorer</h2>
+                <p class="text-slate-600 text-sm">
+                    Formula: $P(X = k) = \frac{e^{-\lambda} \lambda^k}{k!}$ where $\lambda$ is the expected event rate.
+                </p>
+            </div>
+
+            <div id="poisson-error" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-xl text-sm font-medium shadow-sm"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Controls Panel -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5 lg:col-span-1">
+                    <h3 class="font-semibold text-slate-900 border-b pb-2">Parameters</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
+                            <span>Rate Parameter ($\lambda$):</span>
+                            <span id="lambda-val" class="font-bold text-indigo-600">6.00</span>
+                        </label>
+                        <input type="number" id="input-lambda" min="0.1" step="0.1" value="6" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="updatePoisson()">
+                    </div>
+                </div>
+
+                <!-- Visualization & Statistics Panel -->
+                <div class="space-y-6 lg:col-span-2">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Mean ($\mu = \lambda$)</span>
+                            <span id="poisson-mean" class="text-xl font-bold text-indigo-600 mt-1 block">6.00</span>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Variance ($\sigma^2$)</span>
+                            <span id="poisson-variance" class="text-xl font-bold text-indigo-600 mt-1 block">6.00</span>
+                        </div>
+                        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Std Deviation ($\sigma$)</span>
+                            <span id="poisson-stddev" class="text-xl font-bold text-indigo-600 mt-1 block">2.45</span>
+                        </div>
+                    </div>
+
+                    <!-- Poisson Calculators -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                        <h3 class="font-semibold text-slate-900 border-b pb-2">Poisson Probability Calculators</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Target Events ($k$):</label>
+                                <input type="number" id="input-poisson-k" min="0" value="8" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="updatePoisson()">
+                            </div>
+                            <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-xl">
+                                <span class="text-xs font-semibold text-indigo-700 block">P(X = k)</span>
+                                <span id="poisson-pmf-result" class="text-xl font-bold text-indigo-900 mt-0.5 block">0.1033</span>
+                            </div>
+                            <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-xl">
+                                <span class="text-xs font-semibold text-emerald-700 block">P(X <= k)</span>
+                                <span id="poisson-cdf-result" class="text-xl font-bold text-emerald-900 mt-0.5 block">0.8472</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Panel -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-slate-900">Poisson PMF (Red dashed line = Lambda)</h3>
+                        </div>
+                        <div class="relative h-72 w-full">
+                            <canvas id="poissonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-4">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            Undergraduate AIML Laboratory &bull; Discrete Probability Distributions Module
+        </div>
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        function switchTab(tabId) {
+            if (tabId === 'geometric') return;
+            
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-indigo-50', 'text-indigo-700');
+                el.classList.add('text-slate-600');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.classList.remove('text-slate-600', 'hover:text-indigo-600', 'hover:bg-slate-100');
+            activeBtn.classList.add('bg-indigo-50', 'text-indigo-700');
+
+            if (tabId === 'binomial' && !window.binomialChartInstance) {
+                initBinomialChart();
+            }
+            if (tabId === 'poisson' && !window.poissonChartInstance) {
+                initPoissonChart();
+            }
+        }
+
+        // --- BINOMIAL LOGIC ---
+        function combinations(n, k) {
+            if (k < 0 || k > n) return 0;
+            if (k === 0 || k === n) return 1;
+            if (k > n / 2) k = n - k;
+            let c = 1;
+            for (let i = 1; i <= k; i++) c = c * (n - (k - i)) / i;
+            return c;
+        }
+
+        function binomialPMF(n, p, k) {
+            return combinations(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+        }
+
+        const meanLinePlugin = {
+            id: 'meanLinePlugin',
+            afterDraw(chart) {
+                const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+                let mean = chart.canvas.id === 'binomialChart' ? 
+                    parseFloat(document.getElementById('input-n').value) * parseFloat(document.getElementById('input-p').value) :
+                    parseFloat(document.getElementById('input-lambda').value);
+
+                if (!isNaN(mean)) {
+                    const xCoord = x.getPixelForValue(mean);
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+                    ctx.setLineDash([6, 6]);
+                    ctx.moveTo(xCoord, top);
+                    ctx.lineTo(xCoord, bottom);
+                    ctx.stroke();
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+                    ctx.font = '11px Inter, sans-serif';
+                    ctx.fillText(`Mean (${mean.toFixed(1)})`, xCoord + 6, top + 15);
+                    ctx.restore();
+                }
+            }
+        };
+
+        let binomialChartInstance = null;
+
+        function initBinomialChart() {
+            const ctx = document.getElementById('binomialChart').getContext('2d');
+            binomialChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: 'rgba(99, 102, 241, 0.8)', borderRadius: 4 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { title: { display: true, text: 'Successes X' } }, y: { beginAtZero: true } }
+                },
+                plugins: [meanLinePlugin]
+            });
+            updateBinomial();
+        }
+
+        function updateBinomial() {
+            const n = parseInt(document.getElementById('input-n').value, 10);
+            const p = parseFloat(document.getElementById('input-p').value);
+            const k = parseInt(document.getElementById('input-k').value, 10);
+
+            if (isNaN(n) || n <= 0 || isNaN(p) || p < 0 || p > 1) return;
+
+            document.getElementById('n-val').innerText = n;
+            document.getElementById('p-val').innerText = p.toFixed(2);
+            document.getElementById('k-hint').innerText = `0 to ${n}`;
+
+            const mean = n * p;
+            const variance = n * p * (1 - p);
+            const stdDev = Math.sqrt(variance);
+
+            document.getElementById('stat-mean').innerText = mean.toFixed(2);
+            document.getElementById('stat-variance').innerText = variance.toFixed(2);
+            document.getElementById('stat-stddev').innerText = stdDev.toFixed(2);
+            document.getElementById('stat-secondmoment').innerText = (variance + mean * mean).toFixed(2);
+            document.getElementById('stat-skewness').innerText = (stdDev === 0 ? 0 : (1 - 2 * p) / stdDev).toFixed(2);
+
+            if (!isNaN(k) && k >= 0 && k <= n) {
+                document.getElementById('pmf-result').innerText = binomialPMF(n, p, k).toFixed(4);
+                let cdf = 0; for (let i = 0; i <= k; i++) cdf += binomialPMF(n, p, i);
+                document.getElementById('cdf-le-result').innerText = cdf.toFixed(4);
+            }
+
+            const labels = []; const data = [];
+            for (let i = 0; i <= n; i++) { labels.push(i); data.push(binomialPMF(n, p, i)); }
+            if (binomialChartInstance) {
+                binomialChartInstance.data.labels = labels;
+                binomialChartInstance.data.datasets[0].data = data;
+                binomialChartInstance.update();
+            }
+        }
+
+        // --- POISSON LOGIC ---
+        function factorial(num) {
+            if (num === 0 || num === 1) return 1;
+            let acc = 1; for (let i = 2; i <= num; i++) acc *= i;
+            return acc;
+        }
+
+        function poissonPMF(lambda, k) {
+            return (Math.exp(-lambda) * Math.pow(lambda, k)) / factorial(k);
+        }
+
+        let poissonChartInstance = null;
+
+        function initPoissonChart() {
+            const ctx = document.getElementById('poissonChart').getContext('2d');
+            poissonChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: 'rgba(16, 185, 129, 0.8)', borderRadius: 4 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { title: { display: true, text: 'Events X' } }, y: { beginAtZero: true } }
+                },
+                plugins: [meanLinePlugin]
+            });
+            updatePoisson();
+        }
+
+        function updatePoisson() {
+            const lambda = parseFloat(document.getElementById('input-lambda').value);
+            const k = parseInt(document.getElementById('input-poisson-k').value, 10);
+
+            if (isNaN(lambda) || lambda <= 0) return;
+
+            document.getElementById('lambda-val').innerText = lambda.toFixed(2);
+            document.getElementById('poisson-mean').innerText = lambda.toFixed(2);
+            document.getElementById('poisson-variance').innerText = lambda.toFixed(2);
+            document.getElementById('poisson-stddev').innerText = Math.sqrt(lambda).toFixed(2);
+
+            if (!isNaN(k) && k >= 0) {
+                document.getElementById('poisson-pmf-result').innerText = poissonPMF(lambda, k).toFixed(4);
+                let cdf = 0; for (let i = 0; i <= k; i++) cdf += poissonPMF(lambda, i);
+                document.getElementById('poisson-cdf-result').innerText = cdf.toFixed(4);
+            }
+
+            const maxK = Math.max(20, Math.ceil(lambda * 2.5));
+            const labels = []; const data = [];
+            for (let i = 0; i <= maxK; i++) { labels.push(i); data.push(poissonPMF(lambda, i)); }
+            if (poissonChartInstance) {
+                poissonChartInstance.data.labels = labels;
+                poissonChartInstance.data.datasets[0].data = data;
+                poissonChartInstance.update();
+            }
+        }
+    </script>
+</body>
+</html>
